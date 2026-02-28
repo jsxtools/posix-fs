@@ -1,0 +1,53 @@
+{
+	"name": "posix-fs",
+	"version": "0.0.0",
+	"description": "POSIX-normalized file system and path utilities that normalize URLs and Win32 paths to POSIX.",
+	"author": "Jonathan Neal <jonathantneal@hotmail.com> (https://jonneal.dev)",
+	"homepage": "https://github.com/jsxtools/posix-fs",
+	"license": "MIT-0",
+	"type": "module",
+	"exports": {
+		".": "./dist/posix-fs.js",
+		"./node": "./dist/node.js",
+		"./node/fs": "./dist/node/fs.js",
+		"./node/fs/promises": "./dist/node/fs/promises.js",
+		"./node/path": "./dist/node/path.js"
+	},
+	"main": "./dist/posix-fs.js",
+	"types": "./dist/posix-fs.d.ts",
+	"files": ["dist"],
+	"repository": "https://github.com/jsxtools/posix-fs",
+	"bugs": "https://github.com/jsxtools/posix-fs/issues",
+	"sideEffects": false,
+	"engines": {
+		"node": ">=18"
+	},
+	"keywords": ["posix", "path", "normalize", "fs", "filesystem", "win32", "url", "cross-platform"],
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist coverage *.tsbuildinfo",
+		"format": "dprint fmt",
+		"format:check": "dprint check",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"prepublishOnly": "npm run clean && npm run build && npm test",
+		"test": "npm run test:node && npm run test:chromium && npm run test:firefox && npm run test:webkit",
+		"test:chromium": "vitest run --browser.name=chromium",
+		"test:firefox": "vitest run --browser.name=firefox",
+		"test:node": "vitest run --config vitest.node.config.ts",
+		"test:webkit": "vitest run --browser.name=webkit",
+		"type-check": "tsc --noEmit",
+		"vitest": "vitest"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.4",
+		"@types/node": "22.19.13",
+		"@vitest/browser-playwright": "4.0.18",
+		"@vitest/coverage-istanbul": "4.0.18",
+		"@vitest/ui": "4.0.18",
+		"dprint": "0.52.0",
+		"playwright": "1.58.2",
+		"typescript": "5.9.3",
+		"vitest": "4.0.18"
+	}
+}
