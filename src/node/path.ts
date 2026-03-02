@@ -12,7 +12,7 @@ import {
 	relative as relativeBase,
 	resolve as resolveBase,
 } from "node:path/posix";
-import { normalizePath } from "../normalize-path/normalize-path.js";
+import { normalizePath } from "../normalize/normalize.js";
 import type { PathLike } from "../types/path-like.js";
 
 /**
@@ -62,7 +62,7 @@ export const join = (...segments: PathLike[]): string => joinBase(...segments.ma
 
 /**
  * Normalize a path, reducing '..' and '.' parts.
- * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. On Windows backslashes are used. If the path is a zero-length string, '.' is returned, representing the current working directory.
+ * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. If the path is a zero-length string, '.' is returned, representing the current working directory.
  *
  * @param path path to normalize.
  * @throws {TypeError} if `path` is not a string or URL.

@@ -1,23 +1,23 @@
 /// <reference types="node" />
 
 import { Dirent, globSync as globSyncBase, readdirSync as readdirSyncBase } from "node:fs";
-import { normalizePathFromString } from "../normalize-path/normalize-path.js";
+import { normalizePathString } from "../normalize/normalize.js";
 
 export const { globSync, readdirSync } = {
 	globSync(pattern, options?: unknown): Array<string | Dirent> {
 		return globSyncBase(pattern, options!).map((value: string | Dirent<string>) =>
 			value && typeof value === "object"
 				? Object.assign(value, {
-						parentPath: normalizePathFromString(value.parentPath.toString()),
+						parentPath: normalizePathString(value.parentPath.toString()),
 					})
-				: normalizePathFromString(value),
+				: normalizePathString(value),
 		);
 	},
 	readdirSync(path, options?: unknown): Array<string | Dirent> {
 		return readdirSyncBase(path, options!).map((value: string | Dirent<string> | Buffer<ArrayBuffer>) =>
 			value && value instanceof Dirent
-				? Object.assign(value, { name: normalizePathFromString(value.name) })
-				: normalizePathFromString(value.toString()),
+				? Object.assign(value, { name: normalizePathString(value.name) })
+				: normalizePathString(value.toString()),
 		);
 	},
 } as typeof import("node:fs");
