@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseNormalizedPath } from "../src/parse-path/parse-normalized-path.ts";
-import { parsePath, parsePathFromString } from "../src/parse-path/parse-path.ts";
+import { parsePath, parsePathString, parsePathURL } from "../src/parse/parse.ts";
+import { parseNormalizedPath } from "../src/parse/parse-normalized-path.ts";
 
 describe("parseNormalizedPath", () => {
 	it("parses absolute file paths", () => {
@@ -115,10 +115,18 @@ describe("parsePath", () => {
 	});
 });
 
-describe("parsePathFromString", () => {
+describe("parsePathString", () => {
 	it("normalizes and parses string paths", () => {
-		const result = parsePathFromString("/foo/bar/../baz/file.txt");
+		const result = parsePathString("/foo/bar/../baz/file.txt");
 		expect(result.path).toBe("/foo/baz/file.txt");
+		expect(result.name).toBe("file.txt");
+	});
+});
+
+describe("parsePathURL", () => {
+	it("normalizes and parses URL inputs", () => {
+		const result = parsePathURL(new URL("file:///foo/bar/file.txt"));
+		expect(result.path).toBe("/foo/bar/file.txt");
 		expect(result.name).toBe("file.txt");
 	});
 });

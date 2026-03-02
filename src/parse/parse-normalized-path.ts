@@ -1,6 +1,6 @@
 import { CharCode } from "../types/char-code.js";
 
-/** Returns a parsed path from a normalized POSIX path. */
+/** Returns a parsed representation of a normalized POSIX path. */
 export const parseNormalizedPath = (path: string): ParsedPath => {
 	const sizeOfPath = path.length;
 
@@ -38,7 +38,7 @@ export const parseNormalizedPath = (path: string): ParsedPath => {
 	}
 
 	/** Whether the name represents a dotfile. */
-	const isDotFile = sizeOfName > 1 && !isDirectory && !isSpecial && name.charCodeAt(0) === 46; // '.'
+	const isDotFile = sizeOfName > 1 && !isDirectory && !isSpecial && name.charCodeAt(0) === CharCode.Dot;
 
 	/** Position of the last dot in the name. */
 	let indexOfLastDot = -1;

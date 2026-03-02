@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { normalizePath } from "../src/normalize-path/normalize-path.ts";
-import { normalizePathPosix } from "../src/normalize-path/normalize-path-posix.ts";
-import { normalizePathURL } from "../src/normalize-path/normalize-path-url.ts";
-import { normalizePathWin32 } from "../src/normalize-path/normalize-path-win32.ts";
+import { normalizePath } from "../src/normalize/normalize.ts";
+import { normalizePathPosix } from "../src/normalize/normalize-path-posix.ts";
+import { normalizePathURL } from "../src/normalize/normalize-path-url.ts";
+import { normalizePathWin32 } from "../src/normalize/normalize-path-win32.ts";
 
 describe("normalizePath", () => {
 	it("routes to normalizePathPosix or normalizePathWin32 based on backslash presence", () => {
@@ -17,8 +17,28 @@ describe("normalizePath", () => {
 });
 
 describe("normalizePathURL", () => {
-	it("handles URLs with hostname", () => {
+	it("handles URL object", () => {
+		expect(normalizePathURL(new URL("file:///path/to/file"))).toBe("/path/to/file");
+	});
+
+	it("handles URL object with hostname", () => {
+		expect(normalizePathURL(new URL("http://example.com/path"))).toBe("//example.com/path");
+	});
+
+	it("handles URL-like string", () => {
+		expect(normalizePathURL("file:///path/to/file")).toBe("/path/to/file");
+	});
+
+	it("handles URL-like string with hostname", () => {
 		expect(normalizePathURL("file://server/share/file")).toBe("//server/share/file");
+	});
+
+	it("handles URL-like string with hostname and no path", () => {
+		expect(normalizePathURL("file://server")).toBe("//server/");
+	});
+
+	it("handles partial URL", () => {
+		expect(normalizePathURL("file:../relative/file")).toBe("../relative/file");
 	});
 });
 

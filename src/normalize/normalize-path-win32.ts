@@ -51,4 +51,4 @@ export const normalizePathWin32 = (path: string): string => {
 };
 
 /** Returns whether the given path is Windows-like. */
-export const isPathWin32Like = (path: string): path is string => path.includes("\\");
+export const isPathWin32Like = (path: string): path is string => path.includes(PathPart.SeparatorWin32);

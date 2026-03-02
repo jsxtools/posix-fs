@@ -1,6 +1,6 @@
 {
 	"name": "posix-fs",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "POSIX-normalized file system and path utilities that normalize URLs and Win32 paths to POSIX.",
 	"author": "Jonathan Neal <jonathantneal@hotmail.com> (https://jonneal.dev)",
 	"homepage": "https://github.com/jsxtools/posix-fs",
@@ -11,7 +11,10 @@
 		"./node": "./dist/node.js",
 		"./node/fs": "./dist/node/fs.js",
 		"./node/fs/promises": "./dist/node/fs/promises.js",
-		"./node/path": "./dist/node/path.js"
+		"./node/path": "./dist/node/path.js",
+		"./normalize": "./dist/normalize/normalize.js",
+		"./parse": "./dist/parse/parse.js",
+		"./rebase": "./dist/rebase/rebase.js"
 	},
 	"main": "./dist/posix-fs.js",
 	"types": "./dist/posix-fs.d.ts",
