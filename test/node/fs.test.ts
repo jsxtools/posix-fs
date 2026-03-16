@@ -1,5 +1,6 @@
 /// tests
 
+import { globSync as nativeGlobSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { glob, globSync, readdir, readdirSync } from "../../src/node/fs.ts";
 
@@ -18,6 +19,13 @@ describe("glob", () => {
 				resolve();
 			});
 		}));
+
+	it("matches native globSync", () => {
+		const results = globSync("src/**/*.ts");
+		const expected = nativeGlobSync("src/**/*.ts");
+
+		expect(results).toStrictEqual(expected);
+	});
 
 	it("returns Dirents with normalized parentPath when withFileTypes is true", () =>
 		new Promise<void>((resolve, reject) => {
@@ -56,9 +64,15 @@ describe("globSync", () => {
 	});
 
 	it("returns Dirents with normalized parentPath when withFileTypes is true", () => {
-		const results = globSync("src/types/*.ts", { withFileTypes: true });
+		const results = globSync("src/*", { withFileTypes: true });
 
 		expect(results.length).toBeGreaterThan(0);
+
+		const dirs = results.filter((entry) => entry.isDirectory());
+		const files = results.filter((entry) => !entry.isDirectory());
+
+		expect(dirs.length).toBeGreaterThan(0);
+		expect(files.length).toBeGreaterThan(0);
 
 		for (const entry of results) {
 			expect(typeof entry).toBe("object");

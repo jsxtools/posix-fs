@@ -6,7 +6,7 @@ import {
 	readdir as readdirBase,
 	readdirSync as readdirSyncBase,
 } from "node:fs";
-import { normalizeGlob, normalizeOptions, normalizeReaddir, normalizeReaddirOptions } from "./_normalize.js";
+import { normalizeGlobResult, normalizeReaddirResult } from "./_normalize.js";
 
 export const { glob, globSync, readdir, readdirSync } = {
 	glob(pattern, options: any, callback?: any) {
@@ -15,21 +15,14 @@ export const { glob, globSync, readdir, readdirSync } = {
 			options = undefined;
 		}
 
-		options = normalizeOptions(options);
-
-		globBase(pattern, options, (err, dirents) => {
+		globBase(pattern, options, (err, results) => {
 			if (err) return callback(err);
 
-			callback(
-				null,
-				dirents.map((dirent) => normalizeGlob(dirent, options.__proto__)),
-			);
+			callback(null, results.map(normalizeGlobResult));
 		});
 	},
 	globSync(pattern, options?: any) {
-		options = normalizeOptions(options);
-
-		return globSyncBase(pattern, options).map((dirent) => normalizeGlob(dirent, options.__proto__));
+		return globSyncBase(pattern, options).map(normalizeGlobResult);
 	},
 	readdir(path, options: any, callback?: any) {
 		if (typeof options === "function") {
@@ -37,23 +30,14 @@ export const { glob, globSync, readdir, readdirSync } = {
 			options = undefined;
 		}
 
-		options = normalizeReaddirOptions(options);
-
-		readdirBase(path, options as { withFileTypes: true }, (err, dirents) => {
+		readdirBase(path, options, (err, results) => {
 			if (err) return callback(err);
 
-			callback(
-				null,
-				dirents.map((dirent) => normalizeReaddir(dirent, options.__proto__)),
-			);
+			callback(null, results.map(normalizeReaddirResult));
 		});
 	},
 	readdirSync(path, options?: any) {
-		options = normalizeReaddirOptions(options);
-
-		return readdirSyncBase(path, options as { withFileTypes: true }).map((dirent) =>
-			normalizeReaddir(dirent, options.__proto__),
-		);
+		return readdirSyncBase(path, options).map(normalizeReaddirResult);
 	},
 } as typeof import("node:fs");
 

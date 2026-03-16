@@ -1,5 +1,6 @@
 /// <reference lib="ESNext.Array" />
 
+import { glob as nativeGlob } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { glob, readdir } from "../../src/node/fs/promises.ts";
 
@@ -12,6 +13,13 @@ describe("glob", () => {
 		for (const result of results) {
 			expect(result).not.toContain("\\");
 		}
+	});
+
+	it("matches native globSync", async () => {
+		const source = await Array.fromAsync(nativeGlob("src/**/*.ts"));
+		const result = await Array.fromAsync(glob("src/**/*.ts"));
+
+		expect(source).toStrictEqual(result);
 	});
 
 	it("yields Dirents with normalized parentPath when withFileTypes is true", async () => {

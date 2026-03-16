@@ -1,6 +1,6 @@
 {
 	"name": "posix-fs",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "file system and path utilities that normalize paths and URLs to POSIX.",
 	"author": "Jonathan Neal <jonathantneal@hotmail.com> (https://jonneal.dev)",
 	"homepage": "https://github.com/jsxtools/posix-fs",

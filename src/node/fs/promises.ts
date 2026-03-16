@@ -1,22 +1,16 @@
 /// <reference types="node" />
 
 import { glob as globBase, readdir as readdirBase } from "node:fs/promises";
-import { normalizeGlob, normalizeOptions, normalizeReaddir, normalizeReaddirOptions } from "../_normalize.js";
+import { normalizeGlobResult, normalizeReaddirResult } from "../_normalize.js";
 
 export const { glob, readdir } = {
 	async *glob(pattern, options?: any) {
-		options = normalizeOptions(options);
-
 		for await (const value of globBase(pattern, options)) {
-			yield normalizeGlob(value, options.__proto__);
+			yield normalizeGlobResult(value);
 		}
 	},
 	async readdir(path, options?: any) {
-		options = normalizeReaddirOptions(options);
-
-		return readdirBase(path, options as { withFileTypes: true }).then((dirents) =>
-			dirents.map((dirent) => normalizeReaddir(dirent, options.__proto__)),
-		);
+		return readdirBase(path, options).then((results) => results.map(normalizeReaddirResult));
 	},
 } as typeof import("node:fs/promises");
 
