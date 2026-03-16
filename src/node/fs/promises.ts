@@ -1,21 +1,22 @@
 /// <reference types="node" />
 
-import type { Dirent, GlobOptions } from "node:fs";
 import { glob as globBase, readdir as readdirBase } from "node:fs/promises";
-import { normalizePathString } from "../../normalize/normalize.js";
+import { normalizeGlob, normalizeOptions, normalizeReaddir, normalizeReaddirOptions } from "../_normalize.js";
 
 export const { glob, readdir } = {
-	async *glob(pattern, options?: GlobOptions): AsyncIterable<string | Dirent> {
-		for await (const value of globBase(pattern, options!)) {
-			yield value && typeof value === "object"
-				? Object.assign(value, {
-						parentPath: normalizePathString(value.parentPath.toString()),
-					})
-				: normalizePathString(value);
+	async *glob(pattern, options?: any) {
+		options = normalizeOptions(options);
+
+		for await (const value of globBase(pattern, options)) {
+			yield normalizeGlob(value, options.__proto__);
 		}
 	},
-	async readdir(path, options?: { withFileTypes?: false } | null): Promise<string[]> {
-		return (await readdirBase(path, options!)).map(normalizePathString);
+	async readdir(path, options?: any) {
+		options = normalizeReaddirOptions(options);
+
+		return readdirBase(path, options as { withFileTypes: true }).then((dirents) =>
+			dirents.map((dirent) => normalizeReaddir(dirent, options.__proto__)),
+		);
 	},
 } as typeof import("node:fs/promises");
 

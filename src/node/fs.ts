@@ -1,23 +1,58 @@
 /// <reference types="node" />
 
-import { Dirent, globSync as globSyncBase, readdirSync as readdirSyncBase } from "node:fs";
-import { normalizePathString } from "../normalize/normalize.js";
+import {
+	glob as globBase,
+	globSync as globSyncBase,
+	readdir as readdirBase,
+	readdirSync as readdirSyncBase,
+} from "node:fs";
+import { normalizeGlob, normalizeOptions, normalizeReaddir, normalizeReaddirOptions } from "./_normalize.js";
 
-export const { globSync, readdirSync } = {
-	globSync(pattern, options?: unknown): Array<string | Dirent> {
-		return globSyncBase(pattern, options!).map((value: string | Dirent<string>) =>
-			value && typeof value === "object"
-				? Object.assign(value, {
-						parentPath: normalizePathString(value.parentPath.toString()),
-					})
-				: normalizePathString(value),
-		);
+export const { glob, globSync, readdir, readdirSync } = {
+	glob(pattern, options: any, callback?: any) {
+		if (typeof options === "function") {
+			callback = options;
+			options = undefined;
+		}
+
+		options = normalizeOptions(options);
+
+		globBase(pattern, options, (err, dirents) => {
+			if (err) return callback(err);
+
+			callback(
+				null,
+				dirents.map((dirent) => normalizeGlob(dirent, options.__proto__)),
+			);
+		});
 	},
-	readdirSync(path, options?: unknown): Array<string | Dirent> {
-		return readdirSyncBase(path, options!).map((value: string | Dirent<string> | Buffer<ArrayBuffer>) =>
-			value && value instanceof Dirent
-				? Object.assign(value, { name: normalizePathString(value.name) })
-				: normalizePathString(value.toString()),
+	globSync(pattern, options?: any) {
+		options = normalizeOptions(options);
+
+		return globSyncBase(pattern, options).map((dirent) => normalizeGlob(dirent, options.__proto__));
+	},
+	readdir(path, options: any, callback?: any) {
+		if (typeof options === "function") {
+			callback = options;
+			options = undefined;
+		}
+
+		options = normalizeReaddirOptions(options);
+
+		readdirBase(path, options as { withFileTypes: true }, (err, dirents) => {
+			if (err) return callback(err);
+
+			callback(
+				null,
+				dirents.map((dirent) => normalizeReaddir(dirent, options.__proto__)),
+			);
+		});
+	},
+	readdirSync(path, options?: any) {
+		options = normalizeReaddirOptions(options);
+
+		return readdirSyncBase(path, options as { withFileTypes: true }).map((dirent) =>
+			normalizeReaddir(dirent, options.__proto__),
 		);
 	},
 } as typeof import("node:fs");

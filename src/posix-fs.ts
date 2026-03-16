@@ -9,4 +9,5 @@ export {
 export { parsePath as parse, parsePathString, parsePathURL } from "./parse/parse.js";
 export type { ParsedPath } from "./parse/parse-normalized-path.js";
 export { rebasePath as rebase, rebasePathString } from "./rebase/rebase.js";
+export { relativePath as relative, relativePathString } from "./relative/relative.js";
 export type { PathLike } from "./types/path-like.js";

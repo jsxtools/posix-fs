@@ -26,10 +26,12 @@ filesystems.
   - [Core](#core-functionality)
     - [normalize](#normalizepath-string--url-string)
     - [rebase](#rebasebase-string--url-paths-string--url-string)
+    - [relative](#relativebase-string--url-target-string--url-string)
     - [parse](#parsepath-string--url-parsedpath)
   - [Type-Focused](#type-focused-functionality)
     - [normalize](#normalize-functions)
     - [rebase](#rebase-functions)
+    - [relative](#relative-functions)
     - [parse](#parse-functions)
   - [Utilities](#utilities)
     - [isPathURLLike](#ispathurllikepath-string--url-boolean)
@@ -89,6 +91,25 @@ rebase("/a/b/", "c/d/", "../e"); // "/a/b/c/e"
 // URL and Win32 paths are still normalized before rebasing
 rebase(new URL("file:///path/to/"), "file"); // "/path/to/file"
 rebase("C:\\path\\to\\", "file"); //            "/C:/path/to/file"
+```
+
+### Compute relative paths
+
+The **relative** function returns a relative POSIX path from a base path to a
+target path, using URL-style directory resolution.
+
+```js
+import { relative } from "posix-fs";
+
+// Without trailing slash, the base is treated as a file (directory is parent)
+relative("/a/b/c", "/a/b/d/e"); // "./d/e"
+
+// With trailing slash, the base is treated as a directory
+relative("/a/b/c/", "/a/b/d/e"); // "../d/e"
+
+// Works with URLs and Win32 paths
+relative("file:///foo/bar/", "file:///foo/baz"); // "../baz"
+relative("C:\\foo\\bar", "C:\\foo\\baz"); //         "./baz"
 ```
 
 ### Parse paths into components
@@ -156,13 +177,26 @@ import { normalizePathString } from "posix-fs";
 
 #### rebase(base: string | URL, ...paths: (string | URL)[]): string
 
-The **rebase** function returns a normalized POSIX path from the given base resolved against any number of paths using URL-style resolution.
+The **rebase** function returns a normalized POSIX path from the given base
+resolved against any number of paths using URL-style resolution.
 
 ```js
 import { rebase } from "posix-fs";
 
 rebase("/foo/bar", "baz"); //  "/foo/baz"
 rebase("/foo/bar/", "baz"); // "/foo/bar/baz"
+```
+
+#### relative(base: string | URL, target: string | URL): string
+
+The **relative** function returns a relative POSIX path from the base to the
+target, using URL-style directory resolution.
+
+```js
+import { relative } from "posix-fs";
+
+relative("/a/b/c", "/a/b/d/e"); //  "./d/e"
+relative("/a/b/c/", "/a/b/d/e"); // "../d/e"
 ```
 
 #### parse(path: string | URL): ParsedPath
@@ -192,8 +226,8 @@ parse("/path/to/file.txt");
 
 ### Type-Focused Functionality
 
-The `posix-fs/normalize`, `posix-fs/parse`, and `posix-fs/rebase` modules
-provide functions for specific input types.
+The `posix-fs/normalize`, `posix-fs/parse`, `posix-fs/rebase`, and
+`posix-fs/relative` modules provide functions for specific input types.
 
 #### normalize functions
 
@@ -209,9 +243,11 @@ import { normalizePathString, normalizePathURL } from "posix-fs/normalize";
 
 #### parse functions
 
-The **parsePathString** function returns a parsed representation of the given string as a normalized POSIX path.
+The **parsePathString** function returns a parsed representation of the given
+string as a normalized POSIX path.
 
-The **parsePathURL** function returns a parsed representation of the given URL or URL-like string as a normalized POSIX path.
+The **parsePathURL** function returns a parsed representation of the given URL
+or URL-like string as a normalized POSIX path.
 
 ```ts
 import { parsePathString, parsePathURL } from "posix-fs/parse";
@@ -219,10 +255,20 @@ import { parsePathString, parsePathURL } from "posix-fs/parse";
 
 #### rebase functions
 
-The **rebasePathString** function returns a normalized POSIX path from the given string, resolved against any additional string path specifiers using URL-style resolution.
+The **rebasePathString** function returns a normalized POSIX path from the
+given string, resolved against any additional string path specifiers using URL-style resolution.
 
 ```ts
 import { rebasePathString } from "posix-fs/rebase";
+```
+
+#### relative functions
+
+The **relativePathString** function returns a relative POSIX path from the base
+string to the target string, using URL-style directory resolution.
+
+```ts
+import { relativePathString } from "posix-fs/relative";
 ```
 
 <br />
@@ -231,7 +277,8 @@ import { rebasePathString } from "posix-fs/rebase";
 
 #### isPathURLLike(path: string | URL): boolean
 
-The **isPathURLLike** function returns whether the given path is a URL or a URL-like string.
+The **isPathURLLike** function returns whether the given path is a URL or a
+URL-like string.
 
 ```js
 import { isPathURLLike } from "posix-fs";
@@ -243,7 +290,8 @@ isPathURLLike("/file/path/to/file"); //    false
 
 #### isPathWin32Like(path: string): boolean
 
-The **isPathWin32Like** function returns whether the given path contains Win32 backslash separators.
+The **isPathWin32Like** function returns whether the given path contains Win32
+backslash separators.
 
 ```js
 import { isPathWin32Like } from "posix-fs";
@@ -288,11 +336,18 @@ relative("C:\\foo\\bar", "C:\\foo\\baz"); // normalized to "../baz"
 ```
 
 ```js
-import { globSync, readdirSync } from "posix-fs/node/fs";
-import { glob, readdir } from "posix-fs/node/fs/promises";
+import { glob, globSync, readdir, readdirSync } from "posix-fs/node/fs";
 
 const files = globSync("src/**/*.ts"); // POSIX-normalized paths
 const entries = readdirSync("src", { withFileTypes: true }); // POSIX-normalized dirents
+
+// Callback versions
+glob("src/**/*.ts", (err, files) => {
+	/* POSIX-normalized paths */
+});
+readdir("src", { withFileTypes: true }, (err, entries) => {
+	/* POSIX-normalized dirents */
+});
 ```
 
 ### NodeJS Path
@@ -328,30 +383,45 @@ matchesGlob("/foo/bar", "/foo/*"); // true;
 
 ### NodeJS FS
 
-The `posix-fs/node/fs` and `posix-fs/node/fs/promises` modules normalize output paths to POSIX format.
+The `posix-fs/node/fs` and `posix-fs/node/fs/promises` modules normalize output
+paths to POSIX format. Both sync and callback-based versions are provided.
 
 ```js
-import { globSync, readdirSync } from "posix-fs/node/fs";
-import { glob, readdir } from "posix-fs/node/fs/promises";
+import { glob, globSync, readdir, readdirSync } from "posix-fs/node/fs";
+import { glob as globAsync, readdir as readdirAsync } from "posix-fs/node/fs/promises";
 
+// Sync
 const files = globSync("src/**/*.ts"); // POSIX-normalized paths
 const entries = readdirSync("src", { withFileTypes: true }); // POSIX-normalized dirents
+
+// Callback
+glob("src/**/*.ts", (err, files) => {
+	/* POSIX-normalized paths */
+});
+readdir("src", { withFileTypes: true }, (err, entries) => {
+	/* POSIX-normalized dirents */
+});
+
+// Promises
+const asyncFiles = await globAsync("src/**/*.ts");
+const asyncEntries = await readdirAsync("src", { withFileTypes: true });
 ```
 
 <br />
 
 ## Exports
 
-| Export                      | Description                                                             |
-| :-------------------------- | :---------------------------------------------------------------------- |
-| `posix-fs`                  | Core `normalize`, `rebase`, and `parse`. Works in any environment.      |
-| `posix-fs/node`             | Provides both `path` and async `fs` for NodeJS-like environments.       |
-| `posix-fs/node/path`        | POSIX-normalized wrapper around `node:path/posix`.                      |
-| `posix-fs/node/fs`          | POSIX-normalized wrapper around `node:fs` (`globSync`, `readdirSync`).  |
-| `posix-fs/node/fs/promises` | POSIX-normalized wrapper around `node:fs/promises` (`glob`, `readdir`). |
-| `posix-fs/normalize`        | Type-focused normalize functions.                                       |
-| `posix-fs/parse`            | Type-focused parse functions.                                           |
-| `posix-fs/rebase`           | Type-focused rebase functions.                                          |
+| Export                      | Description                                                                    |
+| :-------------------------- | :----------------------------------------------------------------------------- |
+| `posix-fs`                  | Core `normalize`, `rebase`, `relative`, and `parse`. Works in any environment. |
+| `posix-fs/node`             | Provides both `path` and async `fs` for NodeJS-like environments.              |
+| `posix-fs/node/path`        | POSIX-normalized wrapper around `node:path/posix`.                             |
+| `posix-fs/node/fs`          | POSIX-normalized wrapper around `node:fs` (`glob`, `readdir`, and sync).       |
+| `posix-fs/node/fs/promises` | POSIX-normalized wrapper around `node:fs/promises` (`glob`, `readdir`).        |
+| `posix-fs/normalize`        | Type-focused normalize functions.                                              |
+| `posix-fs/parse`            | Type-focused parse functions.                                                  |
+| `posix-fs/rebase`           | Type-focused rebase functions.                                                 |
+| `posix-fs/relative`         | Type-focused relative functions.                                               |
 
 - The `normalize` function contributes up to 1.29 kB minified and uncompressed.
 - The `rebase` function contributes an additional 395 B minified and uncompressed.
